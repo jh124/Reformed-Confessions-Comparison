@@ -71,9 +71,14 @@
     border-right:2px solid var(--oxblood);border-bottom:2px solid var(--oxblood);
     transform:translateY(-65%) rotate(45deg);pointer-events:none;
   }
-  select.topic optgroup{font-style:normal;font-weight:700;color:var(--muted);}
+  select.topic optgroup{font-style:normal;font-weight:700;color:var(--ink);background:#efe9dc;}
+  select.topic option{font-weight:600;color:var(--ink);background:#fff;}
   /* ---------- Columns ---------- */
-  main{max-width:var(--maxw);margin:0 auto;padding:1.3rem clamp(1rem,4vw,3rem) 3rem;}
+  main{
+    max-width:var(--maxw);margin:0 auto;
+    padding:1.3rem clamp(1rem,4vw,3rem) 3rem;
+    display:flow-root;            /* contain the grid; footer always clears it */
+  }
   .columns{
     display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;
     align-items:start;
@@ -82,6 +87,7 @@
     background:var(--panel);border:1px solid var(--rule);border-radius:3px;
     display:flex;flex-direction:column;min-height:320px;
     box-shadow:0 1px 3px var(--shadow);
+    overflow:hidden;                /* keep content inside the column's rounded box */
   }
   .col-head{
     border-bottom:1px solid var(--rule);padding:.6rem .65rem;
@@ -139,8 +145,9 @@
   .col.filled{border-top:2px solid var(--oxblood);}
   /* footer */
   footer{
-    max-width:var(--maxw);margin:0 auto;padding:1.5rem clamp(1rem,4vw,3rem) 3rem;
+    max-width:var(--maxw);margin:1.5rem auto 0;padding:1.5rem clamp(1rem,4vw,3rem) 3rem;
     border-top:1px solid var(--rule);color:var(--muted);font-size:.82rem;line-height:1.5;
+    clear:both;
   }
   footer .confkey{font-family:"Helvetica Neue",Arial,sans-serif;font-size:.74rem;letter-spacing:.04em;}
   /* responsive: collapse to fewer columns on narrow screens */
