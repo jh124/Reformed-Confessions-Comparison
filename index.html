@@ -71,7 +71,6 @@
     border-right:2px solid var(--oxblood);border-bottom:2px solid var(--oxblood);
     transform:translateY(-65%) rotate(45deg);pointer-events:none;
   }
-  select.topic optgroup{font-style:normal;font-weight:700;color:var(--ink);background:#efe9dc;}
   select.topic option{font-weight:600;color:var(--ink);background:#fff;}
   /* ---------- Columns ---------- */
   main{
@@ -199,22 +198,22 @@ async function load(){
   render();
 }
 
+function shortParent(p){
+  // take the part before the first separator so the prefix stays compact
+  return (p||"").split(/[;:(\u2014]/)[0].trim();
+}
+
 function buildTopicSelect(){
   const sel=document.getElementById("topic");
-  // group by parent so subdivided topics nest visually
-  let lastParent=null, og=null;
+  // flat list of every topic, no group headings; subdivided topics show just their
+  // sub-name (e.g. "The Canon of Scripture"). The catch-all "(Other / General)" buckets
+  // keep a short parent prefix so they aren't three identical, contextless entries.
   DATA.topics.forEach((t,i)=>{
-    const label=t.sub ? t.sub : t.topic;
-    if(t.parent && t.sub){
-      if(t.parent!==lastParent){
-        og=document.createElement("optgroup");
-        og.label=t.parent;
-        sel.appendChild(og); lastParent=t.parent;
-      }
-      const o=new Option(label,i); og.appendChild(o);
-    }else{
-      const o=new Option(t.topic,i); sel.appendChild(o); lastParent=null; og=null;
+    let label=t.topic;
+    if(t.sub){
+      label = t.sub.startsWith("(") ? (shortParent(t.parent)+" "+t.sub) : t.sub;
     }
+    sel.appendChild(new Option(label, i));
   });
   sel.addEventListener("change",e=>{
     state.topic=+e.target.value;
