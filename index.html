@@ -187,16 +187,9 @@ async function load(){
   DATA=await res.json();
   buildTopicSelect();
   buildColumns();
-  // sensible default: first four confessions that cover the opening topic
-  const avail=confsForTopic(0);
-  for(let i=0;i<4;i++) state.cols[i]=avail[i]||null;
+  // Start empty: a topic is selected, but every column waits for the reader to choose.
+  state.cols=[null,null,null,null];
   render();
-}
-
-function confsForTopic(ti){
-  const cells=DATA.topics[ti].cells;
-  // preserve global confession order
-  return DATA.confessions.filter(c=>cells[c]!==undefined);
 }
 
 function buildTopicSelect(){
