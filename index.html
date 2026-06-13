@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>The Reformed Confessions — A Comparative Reader</title>
+<style>
+  :root{
+    --ink:#1a1a2e;          /* body text, near-black navy */
+    --oxblood:#6b1f2a;      /* primary accent */
+    --oxblood-soft:#8a3a44;
+    --parchment:#f5f1e8;    /* page field */
+    --panel:#fbf9f4;        /* column field */
+    --rule:#d8cfbf;         /* hairline rules */
+    --muted:#8a8273;        /* captions, disabled */
+    --shadow:rgba(26,26,46,.08);
+    --maxw:1500px;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;background:var(--parchment);color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    line-height:1.5;
+  }
+  /* ---------- Masthead ---------- */
+  header.masthead{
+    background:var(--ink);color:var(--parchment);
+    padding:1.4rem clamp(1rem,4vw,3rem) 1.5rem;
+    border-bottom:3px solid var(--oxblood);
+  }
+  .masthead-inner{max-width:var(--maxw);margin:0 auto;}
+  .eyebrow{
+    font-family:"Helvetica Neue",Arial,sans-serif;text-transform:uppercase;
+    letter-spacing:.28em;font-size:.66rem;font-weight:600;color:#c9a96a;
+    margin:0 0 .4rem;
+  }
+  h1.title{
+    margin:0;font-weight:600;font-size:clamp(1.5rem,3.4vw,2.4rem);
+    letter-spacing:.01em;line-height:1.08;
+  }
+  h1.title .amp{color:var(--oxblood-soft);font-style:italic;}
+  .lede{
+    margin:.55rem 0 0;max-width:54ch;color:#cfc8bb;font-size:.95rem;line-height:1.45;
+  }
+  /* ---------- Topic selector bar ---------- */
+  .topicbar{
+    position:sticky;top:0;z-index:20;
+    background:var(--parchment);border-bottom:1px solid var(--rule);
+    box-shadow:0 1px 0 var(--shadow);
+  }
+  .topicbar-inner{
+    max-width:var(--maxw);margin:0 auto;
+    padding:.85rem clamp(1rem,4vw,3rem);
+    display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;
+  }
+  .topicbar label{
+    font-family:"Helvetica Neue",Arial,sans-serif;text-transform:uppercase;
+    letter-spacing:.18em;font-size:.66rem;font-weight:600;color:var(--oxblood);
+    white-space:nowrap;
+  }
+  .topic-select-wrap{position:relative;flex:1;min-width:260px;max-width:760px;}
+  select.topic{
+    width:100%;appearance:none;-webkit-appearance:none;
+    background:#fff;border:1.5px solid var(--ink);border-radius:2px;
+    color:var(--ink);font-family:inherit;font-size:1.05rem;font-weight:600;
+    padding:.55rem 2.4rem .55rem .8rem;cursor:pointer;
+  }
+  .topic-select-wrap::after{
+    content:"";position:absolute;right:.9rem;top:50%;width:.5rem;height:.5rem;
+    border-right:2px solid var(--oxblood);border-bottom:2px solid var(--oxblood);
+    transform:translateY(-65%) rotate(45deg);pointer-events:none;
+  }
+  select.topic optgroup{font-style:normal;font-weight:700;color:var(--muted);}
+  /* ---------- Columns ---------- */
+  main{max-width:var(--maxw);margin:0 auto;padding:1.3rem clamp(1rem,4vw,3rem) 3rem;}
+  .columns{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;
+    align-items:start;
+  }
+  .col{
+    background:var(--panel);border:1px solid var(--rule);border-radius:3px;
+    display:flex;flex-direction:column;min-height:320px;
+    box-shadow:0 1px 3px var(--shadow);
+  }
+  .col-head{
+    border-bottom:1px solid var(--rule);padding:.6rem .65rem;
+    background:linear-gradient(var(--panel),#f3eee3);
+    border-radius:3px 3px 0 0;
+  }
+  .col-pos{
+    font-family:"Helvetica Neue",Arial,sans-serif;font-size:.6rem;font-weight:700;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+    display:block;margin-bottom:.3rem;
+  }
+  .conf-select-wrap{position:relative;}
+  select.conf{
+    width:100%;appearance:none;-webkit-appearance:none;
+    background:#fff;border:1px solid var(--rule);border-radius:2px;
+    color:var(--ink);font-family:inherit;font-size:.92rem;font-weight:600;
+    padding:.42rem 2rem .42rem .55rem;cursor:pointer;
+  }
+  .conf-select-wrap::after{
+    content:"";position:absolute;right:.7rem;top:50%;width:.42rem;height:.42rem;
+    border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);
+    transform:translateY(-65%) rotate(45deg);pointer-events:none;
+  }
+  select.conf option:disabled{color:#bdb5a5;}
+  .col-body{
+    padding:.85rem .9rem 1.1rem;overflow-wrap:break-word;
+    font-size:.95rem;
+  }
+  .col-body .placeholder{
+    color:var(--muted);font-style:italic;font-size:.92rem;text-align:center;
+    padding:2.4rem .5rem;line-height:1.5;
+  }
+  .col-body .notcovered{
+    color:var(--oxblood-soft);font-style:italic;font-size:.9rem;
+    border-left:2px solid var(--rule);padding:.2rem 0 .2rem .8rem;margin-top:.4rem;
+  }
+  /* confession text styling */
+  .col-body p{margin:0 0 .7rem;text-align:left;}
+  .col-body p.lbl{font-weight:700;color:var(--ink);margin:.85rem 0 .15rem;}
+  .col-body p.lbl:first-child{margin-top:0;}
+  .col-body p.dorthead{font-style:italic;font-weight:700;margin:.9rem 0 .2rem;}
+  .col-body p.q{font-weight:700;margin:.8rem 0 .1rem;}
+  .col-body p.a{margin:0 0 .7rem;padding-left:.7rem;}
+  .col-body b,.col-body strong{font-weight:700;}
+  .col-body i,.col-body em{font-style:italic;}
+  .col-body table.booklist{width:100%;border-collapse:collapse;font-size:.86rem;margin:.3rem 0 .7rem;}
+  .col-body table.booklist td{vertical-align:top;width:50%;padding:0 .4rem 0 0;}
+  .col-body .bl{margin:.02rem 0;}
+  .col-body .bl-head{font-style:italic;}
+  .col-body .bl-sub{font-style:italic;margin-left:.5rem;}
+  .col-body .bl-item{margin-left:.5rem;}
+  .col-body .bl-subitem{margin-left:1.3rem;}
+  /* a column showing content gets an oxblood top accent */
+  .col.filled .col-head{background:linear-gradient(#fff,#f3eee3);}
+  .col.filled{border-top:2px solid var(--oxblood);}
+  /* footer */
+  footer{
+    max-width:var(--maxw);margin:0 auto;padding:1.5rem clamp(1rem,4vw,3rem) 3rem;
+    border-top:1px solid var(--rule);color:var(--muted);font-size:.82rem;line-height:1.5;
+  }
+  footer .confkey{font-family:"Helvetica Neue",Arial,sans-serif;font-size:.74rem;letter-spacing:.04em;}
+  /* responsive: collapse to fewer columns on narrow screens */
+  @media (max-width:1100px){ .columns{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:620px){ .columns{grid-template-columns:1fr;} }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">A Comparative Reader · 1530–1647</p>
+    <h1 class="title">The Reformed Confessions <span class="amp">in parallel</span></h1>
+    <p class="lede">Choose a topic, then set each column to a confession to read how the
+      churches of the Reformation answered the same question — side by side, in their own words.</p>
+  </div>
+</header>
+
+<div class="topicbar">
+  <div class="topicbar-inner">
+    <label for="topic">Topic</label>
+    <div class="topic-select-wrap">
+      <select id="topic" class="topic" aria-label="Select a topic"></select>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="columns" id="columns"></div>
+</main>
+
+<footer>
+  <p>Ten confessions of the Reformation, reorganized topically for comparison. Where a
+     confession is unavailable for a topic, it cannot be selected in that column.</p>
+</footer>
+
+<script>
+const POS=["First column","Second column","Third column","Fourth column"];
+let DATA=null;
+let state={topic:0, cols:[null,null,null,null]};  // cols hold confession names
+
+async function load(){
+  const res=await fetch("data.json");
+  DATA=await res.json();
+  buildTopicSelect();
+  buildColumns();
+  // sensible default: first four confessions that cover the opening topic
+  const avail=confsForTopic(0);
+  for(let i=0;i<4;i++) state.cols[i]=avail[i]||null;
+  render();
+}
+
+function confsForTopic(ti){
+  const cells=DATA.topics[ti].cells;
+  // preserve global confession order
+  return DATA.confessions.filter(c=>cells[c]!==undefined);
+}
+
+function buildTopicSelect(){
+  const sel=document.getElementById("topic");
+  // group by parent so subdivided topics nest visually
+  let lastParent=null, og=null;
+  DATA.topics.forEach((t,i)=>{
+    const label=t.sub ? t.sub : t.topic;
+    if(t.parent && t.sub){
+      if(t.parent!==lastParent){
+        og=document.createElement("optgroup");
+        og.label=t.parent;
+        sel.appendChild(og); lastParent=t.parent;
+      }
+      const o=new Option(label,i); og.appendChild(o);
+    }else{
+      const o=new Option(t.topic,i); sel.appendChild(o); lastParent=null; og=null;
+    }
+  });
+  sel.addEventListener("change",e=>{
+    state.topic=+e.target.value;
+    reconcileColumns();
+    render();
+  });
+}
+
+function reconcileColumns(){
+  // keep selected confessions across topic change; reset any that the new topic lacks
+  const cells=DATA.topics[state.topic].cells;
+  state.cols=state.cols.map(c=> (c && cells[c]!==undefined) ? c : null);
+}
+
+function buildColumns(){
+  const wrap=document.getElementById("columns");
+  wrap.innerHTML="";
+  for(let i=0;i<4;i++){
+    const col=document.createElement("section");
+    col.className="col"; col.dataset.i=i;
+    col.innerHTML=`
+      <div class="col-head">
+        <span class="col-pos">${POS[i]}</span>
+        <div class="conf-select-wrap">
+          <select class="conf" aria-label="Select a confession for ${POS[i]}"></select>
+        </div>
+      </div>
+      <div class="col-body"></div>`;
+    col.querySelector("select.conf").addEventListener("change",e=>{
+      state.cols[i]= e.target.value==="" ? null : e.target.value;
+      render();
+    });
+    wrap.appendChild(col);
+  }
+}
+
+function render(){
+  const topic=DATA.topics[state.topic];
+  const cells=topic.cells;
+  document.getElementById("topic").value=state.topic;
+  document.querySelectorAll(".col").forEach((col,i)=>{
+    const sel=col.querySelector("select.conf");
+    const body=col.querySelector(".col-body");
+    // rebuild options: blank + every confession, disabling those not covering this topic
+    sel.innerHTML="";
+    sel.appendChild(new Option("Select a confession…",""));
+    DATA.confessions.forEach(c=>{
+      const o=new Option(c,c);
+      if(cells[c]===undefined){o.disabled=true;}
+      sel.appendChild(o);
+    });
+    const chosen=state.cols[i];
+    sel.value = chosen || "";
+    if(chosen && cells[chosen]!==undefined){
+      col.classList.add("filled");
+      body.innerHTML=cells[chosen];
+    }else{
+      col.classList.remove("filled");
+      body.innerHTML=`<div class="placeholder">Choose a confession above to read its
+        treatment of this topic.</div>`;
+    }
+  });
+}
+
+load();
+</script>
+</body>
+</html>
