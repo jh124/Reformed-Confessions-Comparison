@@ -217,7 +217,7 @@
       padding:2.6rem 1.5rem;font-size:.95rem;line-height:1.5;}
   }
   /* hide phone-only chrome on larger screens */
-  .pager,.swipe-hint,.chipbar,.col-conf-name,.mobile-empty{display:none;}
+  .pager,.swipe-hint,.chipbar,.col-conf-name,.mobile-empty,.desktop-note{display:none;}
   @media (max-width:620px){
     .pager{display:flex;} .swipe-hint{display:block;}
     .chipbar{display:flex;} .col-conf-name{display:block;}
@@ -226,6 +226,14 @@
     /* empty / single-card states hide the swipe affordances (must come last to win) */
     body.sel-none .swipe-hint,body.sel-one .swipe-hint{display:none;}
     body.sel-none .pager,body.sel-one .pager{display:none;}
+    /* small, unobtrusive note recommending desktop */
+    .desktop-note{
+      display:block;margin:0;
+      padding:.45rem 1.1rem;
+      background:#efe9dc;border-bottom:1px solid var(--rule);
+      color:var(--muted);font-size:.72rem;line-height:1.35;text-align:center;
+      font-style:italic;
+    }
   }
 
   @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
@@ -253,6 +261,8 @@
       churches of the Reformation answered the same question — side by side, in their own words.</p>
   </div>
 </header>
+
+<p class="desktop-note">For the full side-by-side view, open this on a desktop.</p>
 
 <div class="topicbar">
   <div class="topicbar-inner">
