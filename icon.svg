@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="The Reformed Confessions in parallel">
+  <rect width="512" height="512" rx="113" fill="#1a1a2e"/>
+  <!-- three parallel columns: parchment flanks, oxblood center -->
+  <rect x="105" y="115" width="73" height="282" rx="36.5" fill="#f5f1e8"/>
+  <rect x="219.5" y="115" width="73" height="282" rx="36.5" fill="#6b1f2a"/>
+  <rect x="334" y="115" width="73" height="282" rx="36.5" fill="#f5f1e8"/>
+</svg>
