@@ -150,9 +150,91 @@
   }
   footer .confkey{font-family:"Helvetica Neue",Arial,sans-serif;font-size:.74rem;letter-spacing:.04em;}
   /* responsive: collapse to fewer columns on narrow screens */
-  @media (max-width:1100px){ .columns{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:620px){ .columns{grid-template-columns:1fr;} }
+  /* responsive: 4 cols -> 2 (tablet) -> swipe cards (phone) */
+  @media (max-width:1100px) and (min-width:621px){ .columns{grid-template-columns:repeat(2,1fr);} }
+
+  /* ---------- Phone: horizontal swipe cards ---------- */
+  @media (max-width:620px){
+    main{padding:0.7rem 0 2rem;}
+    .columns{
+      display:flex;gap:0;
+      overflow-x:auto;overflow-y:visible;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+      align-items:stretch;
+    }
+    .columns::-webkit-scrollbar{display:none;}
+    .col{
+      flex:0 0 100%;width:100%;scroll-snap-align:center;
+      min-height:auto;border-radius:0;border-left:none;border-right:none;
+      margin:0;
+    }
+    .col-body{font-size:1rem;padding:1rem 1.1rem 1.4rem;}
+    .col-head{padding:.7rem .9rem;}
+    /* on phones, chips drive selection: hide the per-card dropdown + position label,
+       show the confession name as the card heading, and hide unfilled cards entirely */
+    .col-pos,.conf-select-wrap{display:none;}
+    .col-conf-name{display:block;font-weight:700;color:var(--oxblood);font-size:1.05rem;}
+    .col:not(.filled){display:none;}
+    /* page indicator (dots) shown only on phones */
+    .pager{
+      display:flex;justify-content:center;align-items:center;gap:.5rem;
+      padding:.6rem 0 .2rem;
+    }
+    .pager .dot{
+      width:.5rem;height:.5rem;border-radius:50%;background:var(--rule);
+      border:none;padding:0;cursor:pointer;transition:background .15s,transform .15s;
+    }
+    .pager .dot.active{background:var(--oxblood);transform:scale(1.25);}
+    .swipe-hint{
+      text-align:center;font-family:"Helvetica Neue",Arial,sans-serif;
+      font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+      padding:.1rem 0 .5rem;
+    }
+    /* confession chip selector (phones only) */
+    .chipbar{
+      display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;
+      padding:.5rem 1.1rem .6rem;border-top:1px solid var(--rule);
+      background:var(--parchment);
+    }
+    .chipbar::-webkit-scrollbar{display:none;}
+    .chip{
+      flex:0 0 auto;white-space:nowrap;font-family:inherit;font-weight:600;font-size:.82rem;
+      border:1.5px solid var(--rule);background:#fff;color:var(--ink);
+      padding:.5rem .8rem;border-radius:999px;cursor:pointer;line-height:1;
+    }
+    .chip.on{background:var(--oxblood);border-color:var(--oxblood);color:#fff;}
+    .chip:disabled{opacity:.45;cursor:default;}
+    .mobile-empty{text-align:center;color:var(--muted);font-style:italic;
+      padding:2.6rem 1.5rem;font-size:.95rem;line-height:1.5;}
+  }
+  /* hide phone-only chrome on larger screens */
+  .pager,.swipe-hint,.chipbar,.col-conf-name,.mobile-empty{display:none;}
+  @media (max-width:620px){
+    .pager{display:flex;} .swipe-hint{display:block;}
+    .chipbar{display:flex;} .col-conf-name{display:block;}
+    body:not(.sel-none) .mobile-empty{display:none;}
+    body.sel-none .mobile-empty{display:block;}
+    /* empty / single-card states hide the swipe affordances (must come last to win) */
+    body.sel-none .swipe-hint,body.sel-one .swipe-hint{display:none;}
+    body.sel-none .pager,body.sel-one .pager{display:none;}
+  }
+
   @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+
+  /* ---------- Phone chrome: compact masthead + topic bar ---------- */
+  @media (max-width:620px){
+    header.masthead{padding:1rem 1.1rem 1.1rem;}
+    .eyebrow{font-size:.58rem;letter-spacing:.22em;margin-bottom:.3rem;}
+    h1.title{font-size:1.5rem;line-height:1.12;}
+    .lede{display:none;}                 /* reclaim vertical space on small screens */
+    .topicbar-inner{padding:.6rem 1.1rem;gap:.5rem;flex-wrap:nowrap;}
+    .topic-select-wrap{min-width:0;}
+    select.topic{font-size:1rem;padding:.55rem 2.2rem .55rem .7rem;}
+    main{max-width:100%;}
+    footer{padding:1.2rem 1.1rem 2rem;margin-top:1rem;}
+  }
 </style>
 </head>
 <body>
@@ -172,10 +254,14 @@
       <select id="topic" class="topic" aria-label="Select a topic"></select>
     </div>
   </div>
+  <div class="chipbar" id="chipbar" aria-label="Choose confessions to compare"></div>
 </div>
 
 <main>
+  <div class="swipe-hint">Swipe to compare ›</div>
+  <div class="mobile-empty" id="mobileEmpty">Tap a confession above to start comparing.</div>
   <div class="columns" id="columns"></div>
+  <div class="pager" id="pager"></div>
 </main>
 
 <footer>
@@ -237,6 +323,7 @@ function buildColumns(){
     col.innerHTML=`
       <div class="col-head">
         <span class="col-pos">${POS[i]}</span>
+        <span class="col-conf-name"></span>
         <div class="conf-select-wrap">
           <select class="conf" aria-label="Select a confession for ${POS[i]}"></select>
         </div>
@@ -248,6 +335,68 @@ function buildColumns(){
     });
     wrap.appendChild(col);
   }
+  // attach the horizontal-scroll listener once (phones); harmless on desktop grid
+  let raf=null;
+  wrap.addEventListener("scroll",()=>{
+    if(raf) return;
+    raf=requestAnimationFrame(()=>{ raf=null; syncActiveDot(); });
+  });
+}
+
+function filledCols(){
+  return [...document.getElementById("columns").children].filter(c=>c.classList.contains("filled"));
+}
+
+function updatePager(){
+  const pager=document.getElementById("pager");
+  const cards=filledCols();
+  pager.innerHTML="";
+  cards.forEach((col,i)=>{
+    const dot=document.createElement("button");
+    dot.className="dot"; dot.type="button";
+    dot.setAttribute("aria-label","Go to confession "+(i+1));
+    dot.addEventListener("click",()=>col.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"}));
+    pager.appendChild(dot);
+  });
+  syncActiveDot();
+}
+
+function syncActiveDot(){
+  const wrap=document.getElementById("columns");
+  const w=wrap.clientWidth||1;
+  const idx=Math.round(wrap.scrollLeft/w);
+  document.querySelectorAll("#pager .dot").forEach((d,i)=>d.classList.toggle("active",i===idx));
+}
+
+function buildChips(){
+  const bar=document.getElementById("chipbar");
+  const cells=DATA.topics[state.topic].cells;
+  bar.innerHTML="";
+  const selectedCount=state.cols.filter(Boolean).length;
+  // chips = only confessions that cover the current topic, in canonical order
+  DATA.confessions.filter(c=>cells[c]!==undefined).forEach(c=>{
+    const chip=document.createElement("button");
+    chip.type="button"; chip.className="chip";
+    chip.textContent=c.replace(/\s*\(\d+\)\s*$/,"");   // drop the year for a compact label
+    const on=state.cols.includes(c);
+    if(on) chip.classList.add("on");
+    // disable adding a 5th once all four slots are full
+    if(!on && selectedCount>=4) chip.disabled=true;
+    chip.addEventListener("click",()=>toggleConfession(c));
+    bar.appendChild(chip);
+  });
+}
+
+function toggleConfession(c){
+  const idx=state.cols.indexOf(c);
+  if(idx!==-1){
+    state.cols[idx]=null;             // already chosen -> remove
+  }else{
+    const slot=state.cols.indexOf(null);
+    if(slot===-1) return;             // all four full
+    state.cols[slot]=c;               // add to first free slot
+  }
+  render();
 }
 
 function render(){
@@ -257,6 +406,7 @@ function render(){
   document.querySelectorAll(".col").forEach((col,i)=>{
     const sel=col.querySelector("select.conf");
     const body=col.querySelector(".col-body");
+    const nameEl=col.querySelector(".col-conf-name");
     // rebuild options: blank + every confession, disabling those not covering this topic
     sel.innerHTML="";
     sel.appendChild(new Option("Select a confession…",""));
@@ -269,13 +419,21 @@ function render(){
     sel.value = chosen || "";
     if(chosen && cells[chosen]!==undefined){
       col.classList.add("filled");
+      nameEl.textContent=chosen;        // mobile card heading
       body.innerHTML=cells[chosen];
     }else{
       col.classList.remove("filled");
+      nameEl.textContent="";
       body.innerHTML=`<div class="placeholder">Choose a confession above to read its
         treatment of this topic.</div>`;
     }
   });
+  buildChips();
+  // body state classes drive the mobile empty / swipe affordances
+  const n=state.cols.filter(Boolean).length;
+  document.body.classList.toggle("sel-none", n===0);
+  document.body.classList.toggle("sel-one", n===1);
+  updatePager();
 }
 
 load();
